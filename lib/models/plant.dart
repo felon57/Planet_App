@@ -1,5 +1,3 @@
-
-
 // Data model for a plant product used by the app.
 // Fields describe display information (name, category, price, image, etc.)
 // Mutable flags (isFavorated, isSelected) are used in-memory to track
@@ -58,6 +56,40 @@ class Plant {
     required this.isSelected,
   });
 
+  Map<String, Object> toMap() {
+    return {
+      'plantId': plantId,
+      'price': price,
+      'size': size,
+      'rating': rating,
+      'humidity': humidity,
+      'temperature': temperature,
+      'category': category,
+      'plantName': plantName,
+      'imageURL': imageURL,
+      'isFavorated': isFavorated ? 1 : 0,
+      'decription': decription,
+      'isSelected': isSelected ? 1 : 0,
+    };
+  }
+
+  factory Plant.fromMap(Map<String, Object?> map) {
+    return Plant(
+      plantId: map['plantId']! as int,
+      price: map['price']! as int,
+      size: map['size']! as String,
+      rating: (map['rating']! as num).toDouble(),
+      humidity: map['humidity']! as int,
+      temperature: map['temperature']! as String,
+      category: map['category']! as String,
+      plantName: map['plantName']! as String,
+      imageURL: map['imageURL']! as String,
+      isFavorated: map['isFavorated'] == 1,
+      decription: map['decription']! as String,
+      isSelected: map['isSelected'] == 1,
+    );
+  }
+
   /// In-memory catalog of all available plants (mock data for demo purposes).
   static List<Plant> plantList = [
     Plant(
@@ -71,7 +103,8 @@ class Plant {
       temperature: '23 - 34',
       imageURL: 'assets/images/plant-one.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -85,7 +118,8 @@ class Plant {
       temperature: '19 - 22',
       imageURL: 'assets/images/plant-two.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -99,7 +133,8 @@ class Plant {
       temperature: '22 - 25',
       imageURL: 'assets/images/plant-three.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -113,7 +148,8 @@ class Plant {
       temperature: '23 - 28',
       imageURL: 'assets/images/plant-one.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -127,7 +163,8 @@ class Plant {
       temperature: '12 - 16',
       imageURL: 'assets/images/plant-four.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -141,7 +178,8 @@ class Plant {
       temperature: '15 - 18',
       imageURL: 'assets/images/plant-five.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -155,7 +193,8 @@ class Plant {
       temperature: '23 - 26',
       imageURL: 'assets/images/plant-six.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -169,7 +208,8 @@ class Plant {
       temperature: '21 - 24',
       imageURL: 'assets/images/plant-seven.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
     Plant(
@@ -183,7 +223,8 @@ class Plant {
       temperature: '21 - 25',
       imageURL: 'assets/images/plant-eight.png',
       isFavorated: false,
-      decription: 'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
+      decription:
+          'این گیاه یکی از بهترین گیاهان است. در بیشتر مناطق جهان رشد می کند و می تواند حتی در سخت ترین شرایط آب و هوایی نیز زنده بماند.',
       isSelected: false,
     ),
   ];
@@ -197,6 +238,8 @@ class Plant {
   /// Returns all plants whose [isSelected] flag is `true` (added to cart).
   static List<Plant> addedToCartPlants() {
     List<Plant> selectedPlants = Plant.plantList;
-    return selectedPlants.where((element) => element.isSelected == true).toList();
+    return selectedPlants
+        .where((element) => element.isSelected == true)
+        .toList();
   }
 }

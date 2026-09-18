@@ -1,30 +1,40 @@
-
-
-// main.dart — Application entry and root widget
-// - main(): entry point that calls runApp(MyApp()) to start the Flutter engine.
-// - MyApp: StatelessWidget that provides the top-level MaterialApp configuration
-//   (title, debug banner, and the initial home route which is SplashScreen).
-// This file boots the app; keep it small and delegate UI to screens/.
-
 import 'package:flutter/material.dart';
-
+import 'package:planet_app/database/database_helper.dart';
 import 'package:planet_app/screens/splash_screen.dart';
 
-/// Bootstraps the Flutter app and launches the widget tree.
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    DatabaseBootstrap(databaseReady: DatabaseHelper.instance.initialize()),
+  );
 }
 
-/// Root widget that wraps the entire app in a [MaterialApp].
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DatabaseBootstrap extends StatelessWidget {
+  final Future<void> databaseReady;
+
+  const DatabaseBootstrap({super.key, required this.databaseReady});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Plant App',
-      home: SplashScreen(),
+      home: FutureBuilder<void>(
+        future: databaseReady,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(child: Text('خطا در راه‌اندازی پایگاه داده')),
+            );
+          }
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return const SplashScreen();
+        },
+      ),
     );
   }
 }

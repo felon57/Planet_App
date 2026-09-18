@@ -5,30 +5,54 @@
 
 import 'package:flutter/material.dart';
 import 'package:planet_app/const/constants.dart';
+import 'package:planet_app/database/database_helper.dart';
 import 'package:planet_app/models/plant.dart';
 import 'package:planet_app/screens/cart_page.dart';
 import 'package:planet_app/widgets/extensions.dart';
 
 class DetailPage extends StatefulWidget {
   final int plantId;
-  const DetailPage({
-    super.key,
-    required this.plantId,
-  });
+  const DetailPage({super.key, required this.plantId});
 
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
+  Plant? plant;
+
   bool toggleIsSelected(bool isSelected) {
     return !isSelected;
   }
 
   @override
+  void initState() {
+    super.initState();
+    DatabaseHelper.instance.getPlant(widget.plantId).then((loadedPlant) {
+      if (mounted) {
+        setState(() {
+          plant = loadedPlant;
+        });
+        if (loadedPlant != null) {
+          final int index = Plant.plantList.indexWhere(
+            (item) => item.plantId == loadedPlant.plantId,
+          );
+          if (index >= 0) {
+            Plant.plantList[index] = loadedPlant;
+          }
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    List<Plant> plantList = Plant.plantList;
+    final Plant? loadedPlant = plant;
+
+    if (loadedPlant == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       body: Stack(
@@ -53,18 +77,15 @@ class _DetailPageState extends State<DetailPage> {
                       borderRadius: BorderRadius.circular(50.0),
                       color: Constants.primaryColor.withOpacity(0.15),
                     ),
-                    child: Icon(
-                      Icons.close,
-                      color: Constants.primaryColor,
-                    ),
+                    child: Icon(Icons.close, color: Constants.primaryColor),
                   ),
                 ),
                 // Like Button
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      bool fav = plantList[widget.plantId].isFavorated;
-                      plantList[widget.plantId].isFavorated = !fav;
+                      loadedPlant.isFavorated = !loadedPlant.isFavorated;
+                      DatabaseHelper.instance.updatePlant(loadedPlant);
                     });
                   },
                   child: Container(
@@ -75,7 +96,9 @@ class _DetailPageState extends State<DetailPage> {
                       color: Constants.primaryColor.withOpacity(0.15),
                     ),
                     child: Icon(
-                      plantList[widget.plantId].isFavorated == true ? Icons.favorite : Icons.favorite_border,
+                      loadedPlant.isFavorated
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                       color: Constants.primaryColor,
                     ),
                   ),
@@ -100,7 +123,7 @@ class _DetailPageState extends State<DetailPage> {
                     left: 0.0,
                     child: SizedBox(
                       height: 350.0,
-                      child: Image.asset(plantList[widget.plantId].imageURL),
+                      child: Image.asset(loadedPlant.imageURL),
                     ),
                   ),
                   // PlantFeature
@@ -115,15 +138,19 @@ class _DetailPageState extends State<DetailPage> {
                         children: [
                           PlantFeature(
                             title: 'اندازه‌گیاه',
-                            plantFeature: plantList[widget.plantId].size,
+                            plantFeature: loadedPlant.size,
                           ),
                           PlantFeature(
                             title: 'رطوبت‌هوا',
-                            plantFeature: plantList[widget.plantId].humidity.toString().farsiNumber,
+                            plantFeature: loadedPlant.humidity
+                                .toString()
+                                .farsiNumber,
                           ),
                           PlantFeature(
                             title: 'دمای‌نگهداری',
-                            plantFeature: plantList[widget.plantId].temperature.toString().farsiNumber,
+                            plantFeature: loadedPlant.temperature
+                                .toString()
+                                .farsiNumber,
                           ),
                         ],
                       ),
@@ -138,7 +165,11 @@ class _DetailPageState extends State<DetailPage> {
             left: 0.0,
             right: 0.0,
             child: Container(
-              padding: const EdgeInsets.only(top: 80.0, left: 30.0, right: 30.0),
+              padding: const EdgeInsets.only(
+                top: 80.0,
+                left: 30.0,
+                right: 30.0,
+              ),
               height: size.height * 0.5,
               width: size.width,
               decoration: BoxDecoration(
@@ -165,7 +196,7 @@ class _DetailPageState extends State<DetailPage> {
                             color: Constants.primaryColor,
                           ),
                           Text(
-                            plantList[widget.plantId].rating.toString().farsiNumber,
+                            loadedPlant.rating.toString().farsiNumber,
                             style: TextStyle(
                               fontFamily: 'Lalezar',
                               color: Constants.primaryColor,
@@ -179,7 +210,7 @@ class _DetailPageState extends State<DetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            plantList[widget.plantId].plantName,
+                            loadedPlant.plantName,
                             style: TextStyle(
                               fontFamily: 'Lalezar',
                               color: Constants.primaryColor,
@@ -191,10 +222,15 @@ class _DetailPageState extends State<DetailPage> {
                           // Price
                           Row(
                             children: [
-                              SizedBox(height: 19.0, child: Image.asset('assets/images/PriceUnit-green.png')),
+                              SizedBox(
+                                height: 19.0,
+                                child: Image.asset(
+                                  'assets/images/PriceUnit-green.png',
+                                ),
+                              ),
                               const SizedBox(width: 10.0),
                               Text(
-                                plantList[widget.plantId].price.toString().farsiNumber,
+                                loadedPlant.price.toString().farsiNumber,
                                 style: TextStyle(
                                   fontFamily: 'Lalezar',
                                   color: Constants.blackColor,
@@ -211,7 +247,7 @@ class _DetailPageState extends State<DetailPage> {
                   // Product Description
                   const SizedBox(height: 15.0),
                   Text(
-                    plantList[widget.plantId].decription,
+                    loadedPlant.decription,
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.justify,
                     style: TextStyle(
@@ -220,7 +256,7 @@ class _DetailPageState extends State<DetailPage> {
                       height: 1.6,
                       fontSize: 18.0,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -236,7 +272,10 @@ class _DetailPageState extends State<DetailPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CartPage(addedToCartPlants: Plant.addedToCartPlants())),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CartPage(addedToCartPlants: Plant.addedToCartPlants()),
+                  ),
                 );
               },
               child: Container(
@@ -250,13 +289,10 @@ class _DetailPageState extends State<DetailPage> {
                       offset: const Offset(0.0, 1.1),
                       blurRadius: 5.0,
                       color: Constants.primaryColor.withOpacity(0.3),
-                    )
+                    ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.shopping_cart,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.shopping_cart, color: Colors.white),
               ),
             ),
             const SizedBox(width: 20.0),
@@ -270,15 +306,17 @@ class _DetailPageState extends State<DetailPage> {
                       offset: const Offset(0.0, 1.1),
                       blurRadius: 5.0,
                       color: Constants.primaryColor.withOpacity(0.3),
-                    )
+                    ),
                   ],
                 ),
                 child: Center(
                   child: InkResponse(
                     onTap: () {
                       setState(() {
-                        bool isSelected = toggleIsSelected(plantList[widget.plantId].isSelected);
-                        plantList[widget.plantId].isSelected = isSelected;
+                        loadedPlant.isSelected = toggleIsSelected(
+                          loadedPlant.isSelected,
+                        );
+                        DatabaseHelper.instance.updatePlant(loadedPlant);
                       });
                     },
                     child: const Text(
@@ -292,7 +330,7 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

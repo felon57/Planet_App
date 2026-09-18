@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:planet_app/const/constants.dart';
+import 'package:planet_app/database/database_helper.dart';
 import 'package:planet_app/models/plant.dart';
 import 'package:planet_app/screens/detail_page.dart';
 import 'package:planet_app/widgets/extensions.dart';
@@ -20,7 +21,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
 
-  final List<Plant> _plantList = Plant.plantList;
+  List<Plant> _plantList = [];
 
   bool toggleIsFavorit(bool isFavorites) {
     return !isFavorites;
@@ -35,8 +36,28 @@ class _HomePageState extends State<HomePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadPlants();
+  }
+
+  Future<void> _loadPlants() async {
+    final List<Plant> plants = await DatabaseHelper.instance.getPlants();
+    if (mounted) {
+      setState(() {
+        Plant.plantList = plants;
+        _plantList = Plant.plantList;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+
+    if (_plantList.isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -91,7 +112,10 @@ class _HomePageState extends State<HomePage> {
             ),
             // Category
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18.0,
+                vertical: 10.0,
+              ),
               height: 70.0,
               width: size.width,
               child: ListView.builder(
@@ -112,8 +136,12 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(
                           fontFamily: 'iranSans',
                           fontSize: 16.0,
-                          fontWeight: selectedIndex == index ? FontWeight.bold : FontWeight.w300,
-                          color: selectedIndex == index ? Constants.primaryColor : Constants.blackColor,
+                          fontWeight: selectedIndex == index
+                              ? FontWeight.bold
+                              : FontWeight.w300,
+                          color: selectedIndex == index
+                              ? Constants.primaryColor
+                              : Constants.blackColor,
                         ),
                       ),
                     ),
@@ -134,7 +162,10 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => DetailPage(plantId: _plantList[index].plantId)),
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DetailPage(plantId: _plantList[index].plantId),
+                        ),
                       );
                     },
                     child: Container(
@@ -159,12 +190,19 @@ class _HomePageState extends State<HomePage> {
                               child: IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    bool isFavorited = toggleIsFavorit((_plantList[index].isFavorated));
+                                    bool isFavorited = toggleIsFavorit(
+                                      (_plantList[index].isFavorated),
+                                    );
                                     _plantList[index].isFavorated = isFavorited;
                                   });
+                                  DatabaseHelper.instance.updatePlant(
+                                    _plantList[index],
+                                  );
                                 },
                                 icon: Icon(
-                                  _plantList[index].isFavorated == true ? Icons.favorite : Icons.favorite_border_outlined,
+                                  _plantList[index].isFavorated == true
+                                      ? Icons.favorite
+                                      : Icons.favorite_border_outlined,
                                   color: Constants.primaryColor,
                                   size: 20.0,
                                 ),
@@ -182,14 +220,19 @@ class _HomePageState extends State<HomePage> {
                             bottom: 15.0,
                             left: 20.0,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0,
+                                vertical: 2.0,
+                              ),
                               decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(
-                                    20.0,
-                                  )),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
                               child: Text(
-                                r'$' + _plantList[index].price.toString().farsiNumber,
+                                r'$' +
+                                    _plantList[index].price
+                                        .toString()
+                                        .farsiNumber,
                                 style: TextStyle(
                                   color: Constants.primaryColor,
                                   fontSize: 16.0,
@@ -223,7 +266,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -234,7 +277,11 @@ class _HomePageState extends State<HomePage> {
             // New Plants - Text
             Container(
               alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 18.0, bottom: 15.0, top: 20.0),
+              padding: const EdgeInsets.only(
+                right: 18.0,
+                bottom: 15.0,
+                top: 20.0,
+              ),
               child: const Text(
                 'گیاهان جدید',
                 style: TextStyle(
@@ -252,10 +299,7 @@ class _HomePageState extends State<HomePage> {
                 itemCount: _plantList.length,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return NewPlantWidget(
-                    plantList: _plantList,
-                    index: index,
-                  );
+                  return NewPlantWidget(plantList: _plantList, index: index);
                 },
               ),
             ),
